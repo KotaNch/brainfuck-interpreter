@@ -38,7 +38,29 @@ static char *read_file(const char *path, size_t *len) {
   return buf;
 }
 
-static int run(const char *code, size_t len) {
+static size_t *build_jumps(const char *code, size_t len) {
+  size_t *jumps = calloc(len + 1, sizeof *jumps);
+  size_t *stack = malloc((len + 1) * sizeof *stack);
+  if (!jumps || !stack) {
+    free(jumps);
+    free(stack);
+    return NULL;
+  }
+  size_t sp = 0;
+  for (size_t i = 0; i < len; i++) {
+    if (code[i] == '[') {
+      stack[sp++] = i;
+    } else if (code[i] == ']') {
+      size_t open = stack[--sp];
+      jumps[open] = i;
+      jumps[i] = open;
+    }
+  }
+  free(stack);
+  return jumps;
+}
+
+static int run(const char *code, size_t len, const size_t *jumps) {
   unsigned char tape[TAPE_SIZE] = {0};
   size_t ptr = 0;
   for (size_t pc = 0; pc < len; pc++) {
@@ -67,28 +89,12 @@ static int run(const char *code, size_t len) {
     }
     case '[':
       if (tape[ptr] == 0) {
-        int depth = 1;
-        while (depth > 0 && pc + 1 < len) {
-          pc++;
-          if (code[pc] == '[') {
-            depth++;
-          } else if (code[pc] == ']') {
-            depth--;
-          }
-        }
+        pc = jumps[pc];
       }
       break;
     case ']':
       if (tape[ptr] != 0) {
-        int depth = 1;
-        while (depth > 0 && pc > 0) {
-          pc--;
-          if (code[pc] == ']') {
-            depth++;
-          } else if (code[pc] == '[') {
-            depth--;
-          }
-        }
+        pc = jumps[pc];
       }
       break;
     }
@@ -107,7 +113,14 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  int status = run(code, len);
+  size_t *jumps = build_jumps(code, len);
+  if (!jumps) {
+    free(code);
+    return 1;
+  }
+
+  int status = run(code, len, jumps);
+  free(jumps);
   free(code);
   return status;
 }
