@@ -51,10 +51,22 @@ static size_t *build_jumps(const char *code, size_t len) {
     if (code[i] == '[') {
       stack[sp++] = i;
     } else if (code[i] == ']') {
+      if (sp == 0) {
+        fprintf(stderr, "unmatched ']' at %zu\n", i);
+        free(jumps);
+        free(stack);
+        return NULL;
+      }
       size_t open = stack[--sp];
       jumps[open] = i;
       jumps[i] = open;
     }
+  }
+  if (sp > 0) {
+    fprintf(stderr, "unmatched '[' at %zu\n", stack[sp - 1]);
+    free(jumps);
+    free(stack);
+    return NULL;
   }
   free(stack);
   return jumps;
@@ -72,9 +84,17 @@ static int run(const char *code, size_t len, const size_t *jumps) {
       tape[ptr]--;
       break;
     case '>':
+      if (ptr + 1 >= TAPE_SIZE) {
+        fprintf(stderr, "tape overflow at %zu\n", pc);
+        return 1;
+      }
       ptr++;
       break;
     case '<':
+      if (ptr == 0) {
+        fprintf(stderr, "tape underflow at %zu\n", pc);
+        return 1;
+      }
       ptr--;
       break;
     case '.':
