@@ -36,4 +36,18 @@ static char *read_file(const char *path, size_t *len) {
   return buf;
 }
 
-int main(void) { return 0; }
+int main(int argc, char **argv) {
+  if (argc < 2) {
+    fprintf(stderr, "usage: %s file.bf\n", argv[0]);
+    return 1;
+  }
+  size_t len;
+  char *code = read_file(argv[1], &len);
+  if (!code) {
+    return 1;
+  }
+
+  printf("%zu bytes\n", len);
+  free(code);
+  return 0;
+}
