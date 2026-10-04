@@ -5,7 +5,7 @@ bf: src/main.c
 	$(CC) $(CFLAGS) -o $@ $<
 
 test: bf
-	sh test/run.sh
+	sh tests/run.sh
 
 clean:
 	rm -f bf

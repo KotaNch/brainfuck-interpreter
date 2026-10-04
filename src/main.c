@@ -1,4 +1,3 @@
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -102,9 +101,7 @@ static int run(const char *code, size_t len, const size_t *jumps) {
       break;
     case ',': {
       int c = getchar();
-      if (c != EOF) {
-        tape[ptr] = (unsigned char)c;
-      }
+      tape[ptr] = c == EOF ? 0 : (unsigned char)c;
       break;
     }
     case '[':
