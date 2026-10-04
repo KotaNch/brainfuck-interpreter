@@ -65,6 +65,32 @@ static int run(const char *code, size_t len) {
       }
       break;
     }
+    case '[':
+      if (tape[ptr] == 0) {
+        int depth = 1;
+        while (depth > 0 && pc + 1 < len) {
+          pc++;
+          if (code[pc] == '[') {
+            depth++;
+          } else if (code[pc] == ']') {
+            depth--;
+          }
+        }
+      }
+      break;
+    case ']':
+      if (tape[ptr] != 0) {
+        int depth = 1;
+        while (depth > 0 && pc > 0) {
+          pc--;
+          if (code[pc] == ']') {
+            depth++;
+          } else if (code[pc] == '[') {
+            depth--;
+          }
+        }
+      }
+      break;
     }
   }
   return 0;
