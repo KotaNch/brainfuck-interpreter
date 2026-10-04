@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define TAPE_SIZE 30000
+
 static char *read_file(const char *path, size_t *len) {
   FILE *f = fopen(path, "rb");
   if (!f) {
@@ -36,6 +38,31 @@ static char *read_file(const char *path, size_t *len) {
   return buf;
 }
 
+static int run(const char *code, size_t len) {
+  unsigned char tape[TAPE_SIZE] = {0};
+  size_t ptr = 0;
+  for (size_t pc = 0; pc < len; pc++) {
+    switch (code[pc]) {
+    case '+':
+      tape[ptr]++;
+      break;
+    case '-':
+      tape[ptr]--;
+      break;
+    case '>':
+      ptr++;
+      break;
+    case '<':
+      ptr--;
+      break;
+    case '.':
+      putchar(tape[ptr]);
+      break;
+    }
+  }
+  return 0;
+}
+
 int main(int argc, char **argv) {
   if (argc < 2) {
     fprintf(stderr, "usage: %s file.bf\n", argv[0]);
@@ -47,7 +74,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  printf("%zu bytes\n", len);
+  int status = run(code, len);
   free(code);
-  return 0;
+  return status;
 }
