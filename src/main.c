@@ -58,6 +58,13 @@ static int run(const char *code, size_t len) {
     case '.':
       putchar(tape[ptr]);
       break;
+    case ',': {
+      int c = getchar();
+      if (c != EOF) {
+        tape[ptr] = (unsigned char)c;
+      }
+      break;
+    }
     }
   }
   return 0;
