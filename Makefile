@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=-Wall - Wextra -std=c11 -O2
+CFLAGS=-Wall -Wextra -std=c11 -O2
 
 bf: src/main.c
 	$(CC) $(CFLAGS) -o $@ $<
